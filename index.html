@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOsim Web - Simulador de Sistemas Operacionais</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="console">
+    <h1>SOsim Web (Baseado em Maia, 2001)</h1>
+    <div class="console-controls">
+      <button id="btn-create-process">Criar Processo</button>
+      <button id="btn-toggle-sim">Pausar / Iniciar</button>
+      <label>Freq. Clock (ms): <input type="number" id="clock-freq" value="1000" step="100" min="100"></label>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- Janela de Gerência do Processador -->
+    <section class="window" id="cpu-manager">
+      <h2>Gerência do Processador</h2>
+      <div class="cpu-state-box">
+        <h3>Executando (CPU)</h3>
+        <div id="cpu-running" class="process-slot"></div>
+      </div>
+
+      <div class="cpu-state-box">
+        <h3>Pronto (Filas de Prioridade 0-15)</h3>
+        <div id="ready-queues"></div>
+      </div>
+
+      <div class="cpu-state-box">
+        <h3>Espera / I/O</h3>
+        <div id="waiting-queue" class="process-slot-group"></div>
+      </div>
+
+      <div class="controls-panel">
+        <label><input type="checkbox" id="chk-preemption" checked> Escalonamento Preemptivo</label>
+        <label><input type="checkbox" id="chk-dynamic-prio" checked> Prioridade Dinâmica (Boost)</label>
+        <label>Quantum (Pulsos): <input type="number" id="quantum-val" value="3" min="1"></label>
+      </div>
+    </section>
+
+    <!-- Janela de Gerência de Memória -->
+    <section class="window" id="memory-manager">
+      <h2>Gerência de Memória Virtual</h2>
+      <div class="memory-stats">
+        <span>FPL Size (Livres): <strong id="fpl-size">100</strong></span>
+        <span>MPL Size (Modificadas): <strong id="mpl-size">0</strong></span>
+      </div>
+      <div id="ram-grid" class="grid-ram"></div>
+
+      <div class="memory-controls">
+        <label>Política de Busca:
+          <select id="fetch-policy">
+            <option value="demand">Demand Paging</option>
+            <option value="prepaging" selected>Prepaging (Antecipada)</option>
+          </select>
+        </label>
+      </div>
+    </section>
+  </main>
+
+  <footer id="log-window">
+    <h3>Log do Simulador</h3>
+    <div id="log-output"></div>
+  </footer>
+
+  <!-- Modal de Criação de Processo -->
+  <dialog id="modal-process">
+    <form method="dialog" id="form-process">
+      <h3>Criar Novo Processo</h3>
+      <label>Prioridade Base (0-15): <input type="number" id="proc-prio" value="0" min="0" max="15"></label>
+      <label>Limite de Frames (Working Set Max): <input type="number" id="proc-frames" value="5" min="1" max="5"></label>
+      <label>Perfil do Processo:
+        <select id="proc-type">
+          <option value="CPU">CPU-Bound (Sem I/O)</option>
+          <option value="IO_1">IO-Bound Tipo 1 (Boost +1)</option>
+          <option value="IO_2">IO-Bound Tipo 2 (Boost +2)</option>
+          <option value="IO_3">IO-Bound Tipo 3 (Boost +3)</option>
+        </select>
+      </label>
+      <label>Cor do Processo: <input type="color" id="proc-color" value="#ff0000"></label>
+      <menu>
+        <button value="cancel">Cancelar</button>
+        <button id="btn-confirm-process" value="default">Confirmar</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
