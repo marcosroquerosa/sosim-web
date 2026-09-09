@@ -1,0 +1,27 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace, sans-serif; }
+body { background-color: #1e1e1e; color: #f0f0f0; display: flex; flex-direction: column; height: 100vh; padding: 10px; gap: 10px; }
+
+header { background: #2d2d2d; padding: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
+.console-controls { display: flex; gap: 15px; align-items: center; }
+
+button, input, select { background: #3c3c3c; color: #fff; border: 1px solid #555; padding: 5px 10px; cursor: pointer; }
+button:hover { background: #505050; }
+
+.workspace { display: flex; gap: 10px; flex: 1; overflow: hidden; }
+.window { flex: 1; background: #252526; border: 1px solid #3c3c3c; padding: 10px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+
+.cpu-state-box { border: 1px solid #444; padding: 8px; background: #1e1e1e; }
+.process-slot { height: 40px; display: flex; align-items: center; justify-content: center; }
+.process-slot-group { display: flex; gap: 5px; flex-wrap: wrap; min-height: 40px; }
+
+.process-node { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; text-shadow: 0 0 2px #fff; border: 2px solid #fff; }
+
+.grid-ram { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: #1e1e1e; padding: 8px; border: 1px solid #444; }
+.ram-frame { height: 28px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 10px; background: #2a2a2a; }
+.ram-frame.modified { border: 2px solid #ffcc00; }
+
+#log-window { height: 120px; background: #000; border: 1px solid #3c3c3c; padding: 8px; overflow-y: auto; font-size: 12px; }
+#log-output p { margin-bottom: 2px; }
+
+dialog { background: #2d2d2d; color: #fff; border: 1px solid #555; padding: 20px; margin: auto; }
+#form-process { display: flex; flex-direction: column; gap: 10px; }
