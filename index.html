@@ -3,91 +3,225 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOsim Web - Simulador de Sistemas Operacionais</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="SOsim Web — simulador educacional de Sistemas Operacionais">
+  <title>SOsim Web — Simulador de Sistemas Operacionais</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header id="console">
-    <h1>SOsim Web (Baseado em Maia, 2001)</h1>
-    <div class="console-controls">
-      <button id="btn-create-process">Criar Processo</button>
-      <button id="btn-toggle-sim">Pausar / Iniciar</button>
-      <label>Freq. Clock (ms): <input type="number" id="clock-freq" value="1000" step="100" min="100"></label>
+  <header class="topbar">
+    <div>
+      <h1>SOsim <span>Web</span></h1>
+      <p>Simulador educacional de Sistemas Operacionais</p>
+    </div>
+    <div class="top-actions">
+      <button id="btnStart" class="primary">▶ Iniciar</button>
+      <button id="btnPause">Ⅱ Pausar</button>
+      <button id="btnStep">⏭ Tick</button>
+      <button id="btnReset" class="danger">↺ Reiniciar</button>
     </div>
   </header>
 
-  <main class="workspace">
-    <!-- Janela de Gerência do Processador -->
-    <section class="window" id="cpu-manager">
-      <h2>Gerência do Processador</h2>
-      <div class="cpu-state-box">
-        <h3>Executando (CPU)</h3>
-        <div id="cpu-running" class="process-slot"></div>
-      </div>
+  <main class="app-grid">
+    <aside class="sidebar">
+      <section class="panel">
+        <div class="panel-title"><span>Simulação</span><span id="runBadge" class="badge stopped">PARADA</span></div>
+        <div class="metric-grid">
+          <div class="metric"><small>Clock</small><strong id="clockValue">0</strong></div>
+          <div class="metric"><small>Executando</small><strong id="runningPid">—</strong></div>
+          <div class="metric"><small>Prontos</small><strong id="readyCount">0</strong></div>
+          <div class="metric"><small>Bloqueados</small><strong id="blockedCount">0</strong></div>
+        </div>
+      </section>
 
-      <div class="cpu-state-box">
-        <h3>Pronto (Filas de Prioridade 0-15)</h3>
-        <div id="ready-queues"></div>
-      </div>
-
-      <div class="cpu-state-box">
-        <h3>Espera / I/O</h3>
-        <div id="waiting-queue" class="process-slot-group"></div>
-      </div>
-
-      <div class="controls-panel">
-        <label><input type="checkbox" id="chk-preemption" checked> Escalonamento Preemptivo</label>
-        <label><input type="checkbox" id="chk-dynamic-prio" checked> Prioridade Dinâmica (Boost)</label>
-        <label>Quantum (Pulsos): <input type="number" id="quantum-val" value="3" min="1"></label>
-      </div>
-    </section>
-
-    <!-- Janela de Gerência de Memória -->
-    <section class="window" id="memory-manager">
-      <h2>Gerência de Memória Virtual</h2>
-      <div class="memory-stats">
-        <span>FPL Size (Livres): <strong id="fpl-size">100</strong></span>
-        <span>MPL Size (Modificadas): <strong id="mpl-size">0</strong></span>
-      </div>
-      <div id="ram-grid" class="grid-ram"></div>
-
-      <div class="memory-controls">
-        <label>Política de Busca:
-          <select id="fetch-policy">
-            <option value="demand">Demand Paging</option>
-            <option value="prepaging" selected>Prepaging (Antecipada)</option>
+      <section class="panel">
+        <div class="panel-title">Criar processos</div>
+        <label>Tipo
+          <select id="processType">
+            <option value="cpu">CPU-bound</option>
+            <option value="io">I/O-bound</option>
           </select>
         </label>
+        <div class="two-cols">
+          <label>Prioridade
+            <input id="processPriority" type="number" min="0" max="15" value="8">
+          </label>
+          <label>Frames
+            <input id="processFrames" type="number" min="1" max="5" value="3">
+          </label>
+        </div>
+        <label>Quantidade
+          <input id="processCount" type="number" min="1" max="10" value="1">
+        </label>
+        <button id="btnCreate" class="primary full">＋ Criar processo</button>
+        <p class="hint">Cada processo recebe um PID e um PCB. O limite de frames é de 1 a 5.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">Escalonador</div>
+        <label>Política
+          <select id="schedulerPolicy">
+            <option value="rr">Circular (Round Robin)</option>
+            <option value="rr-static">Circular + prioridade estática</option>
+            <option value="rr-dynamic">Circular + prioridade dinâmica</option>
+            <option value="priority">Por prioridade</option>
+          </select>
+        </label>
+        <label>Quantum
+          <input id="quantum" type="range" min="1" max="12" value="4">
+          <output id="quantumOut">4 ticks</output>
+        </label>
+        <label>Velocidade
+          <input id="speed" type="range" min="100" max="1500" step="100" value="650">
+          <output id="speedOut">650 ms/tick</output>
+        </label>
+        <label class="check"><input id="dynamicBoost" type="checkbox" checked> Recompensar processos que aguardam</label>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">Memória virtual</div>
+        <label>Política de busca
+          <select id="pagePolicy">
+            <option value="demand">Sob demanda</option>
+            <option value="prefetch">Antecipada</option>
+          </select>
+        </label>
+        <div class="memory-summary">
+          <span>Frames usados</span><strong id="framesUsed">0 / 100</strong>
+        </div>
+        <div class="memory-bar"><div id="memoryBar"></div></div>
+        <p class="hint">Modelo didático: 100 frames físicos, alocação fixa e substituição local aproximada por FIFO.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">Janelas</div>
+        <div class="window-buttons">
+          <button data-view="processes">Processos</button>
+          <button data-view="processor">Processador</button>
+          <button data-view="memory">Memória</button>
+          <button data-view="paging">Paginação</button>
+          <button data-view="stats">Estatísticas</button>
+          <button data-view="log">Log</button>
+        </div>
+      </section>
+    </aside>
+
+    <section class="workspace">
+      <div class="tabs">
+        <button class="tab active" data-view="processes">Gerência de Processos</button>
+        <button class="tab" data-view="processor">Gerência do Processador</button>
+        <button class="tab" data-view="memory">Gerência de Memória</button>
+        <button class="tab" data-view="paging">Arquivo de Paginação</button>
+        <button class="tab" data-view="stats">Estatísticas</button>
+        <button class="tab" data-view="log">Log</button>
       </div>
+
+      <section id="view-processes" class="view active">
+        <div class="view-head">
+          <div>
+            <h2>Gerência de Processos</h2>
+            <p>Observe PID, estado, prioridade, tempo de CPU e uso de memória.</p>
+          </div>
+          <div class="legend">
+            <span><i class="dot ready"></i>Pronto</span>
+            <span><i class="dot running"></i>Executando</span>
+            <span><i class="dot blocked"></i>Bloqueado</span>
+            <span><i class="dot suspended"></i>Suspenso</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>PID</th><th>Tipo</th><th>Estado</th><th>Prioridade</th><th>CPU</th><th>Frames</th><th>Fila</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="processTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="view-processor" class="view">
+        <div class="view-head">
+          <div><h2>Gerência do Processador</h2><p>Visualização simplificada do escalonamento e das filas.</p></div>
+        </div>
+        <div class="processor-layout">
+          <div class="cpu-card">
+            <div class="cpu-screen">
+              <div class="cpu-label">CPU</div>
+              <div id="cpuProcess" class="cpu-process">IDLE</div>
+              <div id="cpuType" class="cpu-type">Aguardando processo</div>
+            </div>
+            <div class="cpu-meta">
+              <span>Quantum restante <b id="quantumLeft">—</b></span>
+              <span>Política <b id="policyLabel">Circular</b></span>
+            </div>
+          </div>
+          <div class="queue-card">
+            <h3>Fila de prontos</h3>
+            <div id="readyQueue" class="queue"></div>
+            <h3>Fila de bloqueados</h3>
+            <div id="blockedQueue" class="queue"></div>
+            <h3>Suspensos</h3>
+            <div id="suspendedQueue" class="queue"></div>
+          </div>
+        </div>
+        <div class="timeline-panel">
+          <h3>Linha do tempo da CPU</h3>
+          <div id="timeline" class="timeline"></div>
+        </div>
+      </section>
+
+      <section id="view-memory" class="view">
+        <div class="view-head">
+          <div><h2>Gerência de Memória</h2><p>Frames físicos ocupados por processos em execução.</p></div>
+        </div>
+        <div id="memoryGrid" class="memory-grid"></div>
+      </section>
+
+      <section id="view-paging" class="view">
+        <div class="view-head">
+          <div><h2>Arquivo de Paginação</h2><p>Visão didática das páginas que estão fora da memória principal.</p></div>
+        </div>
+        <div id="pagingTable" class="paging-list"></div>
+      </section>
+
+      <section id="view-stats" class="view">
+        <div class="view-head">
+          <div><h2>Estatísticas</h2><p>Métricas acumuladas durante a simulação.</p></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><span>Ticks</span><strong id="statTicks">0</strong></div>
+          <div class="stat-card"><span>Processos criados</span><strong id="statCreated">0</strong></div>
+          <div class="stat-card"><span>Finalizados</span><strong id="statFinished">0</strong></div>
+          <div class="stat-card"><span>Uso da CPU</span><strong id="statCpu">0%</strong></div>
+          <div class="stat-card"><span>Trocas de contexto</span><strong id="statContext">0</strong></div>
+          <div class="stat-card"><span>Page faults</span><strong id="statFaults">0</strong></div>
+        </div>
+        <div class="chart-card">
+          <h3>Tempo de CPU por processo</h3>
+          <div id="cpuChart" class="bar-chart"></div>
+        </div>
+      </section>
+
+      <section id="view-log" class="view">
+        <div class="view-head">
+          <div><h2>Log da simulação</h2><p>Eventos relevantes produzidos pelo simulador.</p></div>
+          <button id="btnClearLog">Limpar log</button>
+        </div>
+        <div id="log" class="log"></div>
+      </section>
     </section>
   </main>
 
-  <footer id="log-window">
-    <h3>Log do Simulador</h3>
-    <div id="log-output"></div>
-  </footer>
-
-  <!-- Modal de Criação de Processo -->
-  <dialog id="modal-process">
-    <form method="dialog" id="form-process">
-      <h3>Criar Novo Processo</h3>
-      <label>Prioridade Base (0-15): <input type="number" id="proc-prio" value="0" min="0" max="15"></label>
-      <label>Limite de Frames (Working Set Max): <input type="number" id="proc-frames" value="5" min="1" max="5"></label>
-      <label>Perfil do Processo:
-        <select id="proc-type">
-          <option value="CPU">CPU-Bound (Sem I/O)</option>
-          <option value="IO_1">IO-Bound Tipo 1 (Boost +1)</option>
-          <option value="IO_2">IO-Bound Tipo 2 (Boost +2)</option>
-          <option value="IO_3">IO-Bound Tipo 3 (Boost +3)</option>
-        </select>
-      </label>
-      <label>Cor do Processo: <input type="color" id="proc-color" value="#ff0000"></label>
-      <menu>
-        <button value="cancel">Cancelar</button>
-        <button id="btn-confirm-process" value="default">Confirmar</button>
-      </menu>
-    </form>
+  <dialog id="pcbDialog">
+    <div class="dialog-head">
+      <h2>PCB — Processo <span id="pcbTitle"></span></h2>
+      <button id="closePcb">×</button>
+    </div>
+    <div id="pcbContent" class="pcb-content"></div>
   </dialog>
+
+  <footer>
+    SOsim Web • Simulador educacional independente • Compatível com GitHub Pages
+  </footer>
 
   <script src="app.js"></script>
 </body>
