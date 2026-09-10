@@ -7,6 +7,7 @@ O **SOsim Web** é uma reimplementação web, independente e de código aberto, 
 O projeto foi desenvolvido com **HTML, CSS e JavaScript**, funcionando diretamente no navegador e podendo ser hospedado no **GitHub Pages**.
 
 **Desenvolvimento**: o código-fonte desta reimplementação web foi desenvolvido com auxílio de inteligência artificial generativa (ChatGPT, da OpenAI).
+
 ---
 
 ## Origem e inspiração
